@@ -550,7 +550,7 @@ const WH_LABS=['조리사','조리원','영양사','매니저','파출'];
 const KEY='sjsk4_';
 
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTlpT0-i5bvFn45cpt38feaygte8oxEOPRJZuHOfP0VA-J1lDt7aNVO2aThxUnjH0g8A/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXNu8LzTU8TtOMqMKyEEwDGrzYlBi11pw2ZQgppzr8fB2Vr_UQmnSAiso8MlWDL-u9mg/exec';
 let allData = {}, currentOper = '운영';
 
 /* ── jsonbin helpers ── */
@@ -750,6 +750,7 @@ function clearFields(){
 function clearForm(){clearFields();setOper('운영');}
 
 /* ── 저장 ── */
+/* ── 저장 ── */
 async function saveData(){
   const site=document.getElementById('sel-site').value;
   if(!site){toast('사업장을 선택해 주세요');return;}
@@ -767,33 +768,33 @@ async function saveData(){
       wh_day[dt][k]=parseFloat(document.getElementById('wh-'+di+'-'+k)?.value)||0;
     });
   });
+  
   const payload={site,active:currentOper,
     reason:document.getElementById('inp-reason').value.trim(),
     writer:document.getElementById('inp-writer').value.trim(),
     foodcnt,effmeal,menuname,wh_day,
     updatedAt:new Date().toLocaleString('ko-KR')};
 
-  // ── 1. 로컬 캐시 저장 (오프라인 대비) ──
+  // 1. 로컬 캐시 저장
   localStorage.setItem(KEY+site,JSON.stringify(payload));
   allData[site]=payload;
   renderAdmin();
 
-  // ── 2. 구글 스프레드시트 저장 ──
+  // 2. 구글 스프레드시트 저장 (정식 Form Data 방식)
   const btn = document.querySelector('.btn-save');
   const origText = btn.textContent;
   btn.textContent = '저장 중...'; btn.disabled = true;
 
   try {
+    // 일반 텍스트가 아닌, 정식 웹 폼 데이터(Form) 형식으로 포장합니다.
+    const formData = new URLSearchParams();
+    formData.append("data", JSON.stringify(payload));
+
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors', // ★ 브라우저 자체 보안(CORS) 에러를 강제로 우회하는 핵심 옵션
-      headers: {
-        'Content-Type': 'text/plain' 
-      },
-      body: JSON.stringify(payload)
+      body: formData // 보안을 무사통과하는 핵심입니다.
     });
 
-    // no-cors 옵션 사용 시 브라우저가 구글의 반환값을 읽지 못하므로 에러 없이 도달하면 성공으로 간주합니다.
     toast('성공적으로 구글 시트에 저장되었습니다 ✓');
     
   } catch (err) {
