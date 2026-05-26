@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스마트 키친 운영현황 취합 | 사조푸디스트</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Pretendard',sans-serif;background:#f4f3ef;color:#1a1a18;font-size:14px;min-height:100vh}
+
+/* ── Header ── */
+.hd{background:#1a1a18;color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
+.hd-title{font-size:15px;font-weight:600;letter-spacing:-.02em}
+.hd-sub{font-size:11px;color:#888;margin-top:2px}
+.btn-csv{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-csv:hover{background:rgba(255,255,255,.18)}
+
+/* ── Tab ── */
+.tabs{background:#fff;border-bottom:1px solid #e4e3de;display:flex;padding:0 28px;position:sticky;top:55px;z-index:200}
+.tab{padding:12px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;color:#999;font-family:inherit;transition:all .15s}
+.tab.on{color:#1a1a18;border-bottom-color:#1a1a18}
+.tab:hover:not(.on){color:#444}
+
+/* ── Layout ── */
+.wrap{max-width:820px;margin:0 auto;padding:22px 18px}
+.pane{display:none}.pane.on{display:block}
+
+/* ── Card ── */
+.card{background:#fff;border:1px solid #e4e3de;border-radius:10px;padding:18px 20px;margin-bottom:12px}
+.card-ttl{font-size:10px;font-weight:700;color:#bbb;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+
+/* ── Form atoms ── */
+.fl{display:flex;flex-direction:column;gap:4px}
+.fl label{font-size:11px;color:#999}
+input[type=text],input[type=number],select,textarea{font-family:inherit;font-size:13px;color:#1a1a18;background:#fff;border:1px solid #dddcd7;border-radius:6px;outline:none;transition:border-color .15s}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:#888}
+input[type=text],input[type=number],select{height:34px;padding:0 9px}
+textarea{padding:8px 9px;resize:vertical;line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── 운영여부 ── */
+.oper-tog{display:flex;border:1px solid #dddcd7;border-radius:7px;overflow:hidden;width:fit-content}
+.ob{padding:8px 26px;font-size:13px;font-weight:500;cursor:pointer;background:#fff;color:#aaa;border:none;font-family:inherit;transition:all .15s}
+.ob:first-child{border-right:1px solid #dddcd7}
+.ob.run{background:#1a1a18;color:#fff}
+.ob.stp{background:#c0392b;color:#fff}
+.reason-box{margin-top:12px;display:none}
+.reason-box.show{display:block}
+.reason-hint{font-size:11px;color:#c0392b;font-weight:600;margin-bottom:5px}
+
+/* ── 날짜 탭 ── */
+.dtabs{display:flex;gap:6px;margin-bottom:16px}
+.dtab{padding:6px 18px;font-size:12px;font-weight:600;border:1px solid #dddcd7;border-radius:20px;cursor:pointer;background:#fff;color:#999;font-family:inherit;transition:all .15s}
+.dtab.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
+
+/* ── 안내박스 ── */
+.guide{background:#eef4ff;border:1px solid #c4d8f5;border-radius:7px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#2c5fad;line-height:1.75}
+.guide strong{font-weight:700}
+
+/* ── 끼니 블록 ── */
+.meal-block{border:1px solid #e4e3de;border-radius:8px;overflow:hidden;margin-bottom:8px}
+.meal-hd{background:#f8f7f3;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4e3de}
+.meal-hd-name{font-size:14px;font-weight:700;color:#1a1a18}
+.meal-hd-right{display:flex;align-items:center;gap:10px}
+.meal-cnt-wrap{display:flex;align-items:center;gap:5px}
+.meal-cnt-wrap input{width:72px;text-align:center;font-size:14px;font-weight:600}
+.meal-cnt-unit{font-size:11px;color:#aaa}
+.eff-chk-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border:1px solid #dddcd7;border-radius:6px;background:#fff;transition:all .15s}
+.eff-chk-wrap input[type=checkbox]{width:14px;height:14px;accent-color:#2e7d32;cursor:pointer}
+.eff-chk-wrap span{font-size:12px;color:#666}
+.eff-chk-wrap.on{background:#edf7e6;border-color:#7eba64}
+.eff-chk-wrap.on span{color:#2e7d32;font-weight:600}
+.meal-body{padding:12px 14px;display:none}
+.meal-body.show{display:block}
+.menu-inp-wrap{margin-bottom:10px}
+.menu-inp-wrap label{font-size:11px;color:#2e7d32;font-weight:600;display:block;margin-bottom:4px}
+.menu-inp-wrap input{width:100%;background:#f3fbf0;border-color:#b0d9a0}
+/* 일단위 시수 박스 */
+.day-wh-box{border:1.5px solid #d0cfc9;border-radius:8px;padding:14px 16px;margin-top:10px;background:#fff}
+.day-wh-box-title{font-size:14px;font-weight:700;color:#1a1a18;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.day-wh-box-hint{font-size:11px;color:#888;font-weight:400;line-height:1.5;margin-bottom:12px}
+.day-wh-box-hint strong{color:#1a1a18;font-weight:600}
+.wh-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.wh-item label{font-size:12px;color:#1a1a18;font-weight:600;display:block;margin-bottom:4px;text-align:center}
+.wh-item input{width:100%;text-align:center;font-size:13px}
+
+/* ── 일 합계 바 ── */
+.day-total-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:9px 14px;background:#f0ede5;border-top:1px solid #e4e3de}
+.dtb-label{font-size:12px;color:#888}
+.dtb-val{font-size:17px;font-weight:700;color:#1a1a18;letter-spacing:-.02em;min-width:36px;text-align:right}
+.dtb-unit{font-size:12px;color:#aaa}
+
+/* ── 저장버튼 ── */
+.btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.btn-save{background:#1a1a18;color:#fff;padding:9px 28px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+.btn-save:hover{opacity:.8}
+.btn-clear{background:#fff;color:#888;padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;border:1px solid #dddcd7;font-family:inherit}
+.btn-clear:hover{background:#f8f7f3}
+
+/* ── 관리자 탭 ── */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metric{background:#fff;border:1px solid #e4e3de;border-radius:10px;padding:13px 15px}
+.m-label{font-size:11px;color:#bbb;font-weight:500;margin-bottom:4px}
+.m-val{font-size:22px;font-weight:700;letter-spacing:-.03em}
+.m-sub{font-size:11px;color:#aaa;margin-top:2px}
+.prog-bar{height:3px;background:#e8e7e2;border-radius:2px;margin-bottom:16px}
+.prog-fill{height:100%;background:#1a1a18;border-radius:2px;transition:width .4s}
+
+/* ── 집계 카드 ── */
+.agg-card{background:#fff;border:1px solid #e4e3de;border-radius:10px;padding:18px 20px;margin-bottom:12px}
+.agg-title{font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.agg-title span{font-size:11px;color:#aaa;font-weight:400}
+.agg-table{width:100%;border-collapse:collapse;font-size:12px}
+.agg-table th{background:#f8f7f3;padding:7px 10px;text-align:center;border:1px solid #e4e3de;font-weight:600;color:#555;font-size:11px}
+.agg-table td{padding:6px 10px;border:1px solid #e8e7e2;text-align:center;color:#333}
+.agg-table td.site-nm{text-align:left;font-weight:500}
+.agg-table tr:hover td{background:#fafaf7}
+.agg-table td.eff-yes{color:#2e7d32;font-weight:600}
+.agg-table td.num{font-weight:600}
+.tag-meals{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.tag{background:#edf7e6;color:#2e7d32;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500;white-space:nowrap}
+
+/* ── 사업장 목록 ── */
+.filter-wrap{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.filter-wrap input,.filter-wrap select{flex:1;min-width:110px;height:34px;padding:0 10px;border:1px solid #dddcd7;border-radius:7px;font-size:13px;font-family:inherit;outline:none;background:#fff}
+.site-list{border:1px solid #e4e3de;border-radius:10px;overflow:hidden;background:#fff;margin-bottom:12px}
+.site-row{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;border-bottom:1px solid #f0efe9;transition:background .1s}
+.site-row:last-child{border-bottom:none}
+.site-row:hover{background:#fafaf7}
+.site-nm{font-size:13px;font-weight:600}
+.site-sub{font-size:11px;color:#bbb;margin-top:1px}
+.badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
+.b-ok{background:#e6f4d9;color:#357a16}
+.b-ng{background:#fdecea;color:#c0392b}
+.b-no{background:#f0efe9;color:#bbb}
+.btn-sm{background:none;border:1px solid #dddcd7;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;color:#555;font-family:inherit}
+.btn-sm:hover{background:#f8f7f3}
+
+/* ── 상세 팝업 ── */
+.detail-card{background:#fff;border:1px solid #e4e3de;border-radius:10px;padding:20px;margin-top:10px}
+.dc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.dc-title{font-size:14px;font-weight:700}
+.dc-meta{font-size:11px;color:#aaa;margin-top:2px}
+.btn-x{background:none;border:none;font-size:22px;color:#bbb;cursor:pointer;padding:0;line-height:1}
+.dc-date-title{font-size:12px;font-weight:700;color:#555;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid #f0efe9}
+.dc-meal-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid #fafaf7;font-size:12px}
+.dc-meal-row:last-child{border-bottom:none}
+.dc-meal-key{color:#888;min-width:30px}
+.dc-meal-val{text-align:right;flex:1;padding-left:8px}
+.dc-meal-menu{font-size:11px;color:#2e7d32;margin-top:2px}
+.dc-day-sum{display:flex;justify-content:space-between;padding:7px 0 0;font-size:12px;margin-top:4px}
+.dc-day-sum span:first-child{font-weight:600;color:#555}
+.dc-day-sum span:last-child{font-weight:700;font-size:14px}
+.dc-wh-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #fafaf7}
+.dc-wh-row:last-child{border-bottom:none}
+
+/* ── 절감 집계 ── */
+.save-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.save-metric{background:#edf7e6;border:1px solid #b0d9a0;border-radius:8px;padding:13px 15px;text-align:center}
+.save-metric.red{background:#fdecea;border-color:#f0a8a4}
+.save-metric label{font-size:10px;color:#666;display:block;margin-bottom:4px;font-weight:600}
+.save-metric .sv{font-size:20px;font-weight:700;color:#2e7d32}
+.save-metric.red .sv{color:#c0392b}
+
+/* ── toast ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(6px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .22s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:32px;color:#bbb;font-size:13px}
+
+@media(max-width:620px){
+  .hd{padding:13px 15px}.tabs{padding:0 8px}.wrap{padding:14px 11px}
+  .metric-row{grid-template-columns:1fr 1fr}
+  .wh-row{grid-template-columns:repeat(3,1fr)}
+  .save-grid{grid-template-columns:1fr 1fr}
+  .meal-hd{flex-wrap:wrap;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div>
+    <div class="hd-title">스마트 키친 운영현황 취합</div>
+    <div class="hd-sub">5월 23–25일 · 효율화 자재 운영 데이터</div>
+  </div>
+  <button class="btn-csv" onclick="exportCSV()">CSV 내보내기</button>
+</div>
+
+<div class="tabs">
+  <button class="tab on"  onclick="goTab('input',this)">사업장 입력</button>
+  <button class="tab"     onclick="goTab('admin',this)">취합 현황</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ══════════ 입력 탭 ══════════ -->
+  <div id="pane-input" class="pane on">
+
+    <!-- 사업장 선택 -->
+    <div class="card">
+      <div class="card-ttl">사업장 선택</div>
+      <div class="g3" style="margin-bottom:10px">
+        <div class="fl"><label>사업부</label>
+          <select id="sel-bu" onchange="onBu()"><option value="">전체 사업부</option></select>
+        </div>
+        <div class="fl"><label>운영팀</label>
+          <select id="sel-team" onchange="onTeam()"><option value="">팀 선택</option></select>
+        </div>
+        <div class="fl"><label>사업장</label>
+          <select id="sel-site" onchange="onSite()"><option value="">사업장 선택</option></select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="fl"><label>작성자</label>
+          <input type="text" id="inp-writer" placeholder="성명 입력">
+        </div>
+      </div>
+    </div>
+
+    <div id="form-body" style="display:none">
+
+      <!-- 운영여부 -->
+      <div class="card">
+        <div class="card-ttl">효율화 메뉴 운영 여부</div>
+        <div class="oper-tog">
+          <button class="ob run" id="ob-run"  onclick="setOper('운영')">운영</button>
+          <button class="ob"     id="ob-stop" onclick="setOper('미운영')">미운영</button>
+        </div>
+        <div class="reason-box" id="reason-box">
+          <div class="reason-hint">⚠ 미운영 사유를 입력해 주세요</div>
+          <textarea id="inp-reason" rows="2" placeholder="예) 행사 메뉴 운영 / 효율화 자재 적용 불가 메뉴 구성 등" style="width:100%"></textarea>
+        </div>
+      </div>
+
+      <!-- 날짜별 입력 -->
+      <div class="card">
+        <div class="card-ttl">날짜별 끼니 · 효율화 메뉴 · 조리 시수 입력</div>
+
+        <div class="guide">
+          <strong>입력 방법 안내</strong><br>
+          · 날짜 탭을 선택한 후 끼니별 <strong>예상 평균 식수(인원)</strong>를 입력하세요.<br>
+          · 운영하지 않는 끼니는 <strong>빈칸 또는 0</strong>으로 입력해도 됩니다.<br>
+          · 효율화 메뉴를 제공하는 끼니는 <strong>효율화 제공 체크</strong> 후 메뉴명을 입력하세요.<br>
+          · 끼니별 식수·메뉴 입력 후, 하단 <strong>조리 시수 입력</strong> 박스에서 해당일의 직책별 총 시수를 입력하세요.<br>
+          &nbsp;&nbsp;예) 조리사 2명이 각 4H 근무 → <strong>8H</strong> 입력 (전 인원 합산 총 시수)
+        </div>
+
+        <div class="dtabs">
+          <button class="dtab on" onclick="goDate(0,this)">5월 23일 (금)</button>
+          <button class="dtab"    onclick="goDate(1,this)">5월 24일 (토)</button>
+          <button class="dtab"    onclick="goDate(2,this)">5월 25일 (일)</button>
+        </div>
+
+        <div id="meal-panels"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearForm()">초기화</button>
+        <button class="btn-save"  onclick="saveData()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 취합 탭 ══════════ -->
+  <div id="pane-admin" class="pane">
+
+    <!-- 요약 지표 -->
+    <div class="metric-row">
+      <div class="metric"><div class="m-label">전체 사업장</div><div class="m-val" id="m-total">0</div></div>
+      <div class="metric"><div class="m-label">운영 완료</div>  <div class="m-val" id="m-done"  style="color:#357a16">0</div></div>
+      <div class="metric"><div class="m-label">미운영</div>     <div class="m-val" id="m-stop"  style="color:#c0392b">0</div></div>
+      <div class="metric"><div class="m-label">미입력</div>     <div class="m-val" id="m-pend"  style="color:#bbb">0</div></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+
+    <!-- 절감 집계 -->
+    <div class="agg-card">
+      <div class="agg-title">조리 시수 절감 집계 <span>입력 완료 사업장 기준</span></div>
+      <div class="save-grid">
+        <div class="save-metric"><label>일평균 총 시수 합계</label><div class="sv" id="agg-wh-total">0H</div></div>
+        <div class="save-metric"><label>효율화 적용 시수 합계</label><div class="sv" id="agg-eff-total">0H</div></div>
+        <div class="save-metric red"><label>절감 시수 합계</label><div class="sv" id="agg-save-total">0H</div></div>
+      </div>
+      <div class="agg-table-wrap" style="overflow-x:auto">
+      <table class="agg-table" id="agg-table">
+        <thead>
+          <tr>
+            <th rowspan="2">사업장</th>
+            <th rowspan="2">사업부</th>
+            <th colspan="3">효율화 메뉴 제공 현황</th>
+            <th colspan="3">조리 시수 (H)</th>
+          </tr>
+          <tr>
+            <th>5/23</th><th>5/24</th><th>5/25</th>
+            <th>일평균</th><th>효율화적용</th><th>절감</th>
+          </tr>
+        </thead>
+        <tbody id="agg-body"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <!-- 사업장별 필터/목록 -->
+    <div class="filter-wrap">
+      <input type="text" id="srch" placeholder="🔍 사업장명 검색..." oninput="renderAdmin()">
+      <select id="f-status" onchange="renderAdmin()">
+        <option value="">전체 상태</option>
+        <option value="운영">운영 완료</option>
+        <option value="미운영">미운영</option>
+        <option value="none">미입력</option>
+      </select>
+      <select id="f-bu" onchange="renderAdmin()">
+        <option value="">전체 사업부</option>
+      </select>
+    </div>
+
+    <div id="admin-list"></div>
+    <div id="detail-area"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════ DATA ═══════════════ */
+const SITES=[
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군리더십센터점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'하이원힐콘도점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'하이원마운틴콘도점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부5팀',name:'소노캄제주점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'참바로병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'파티마정소아과점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'롯데아울렛부여점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'경희병원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부1팀',name:'서울프라임병원천안점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'하이원워터월드점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'영천제이병원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부1팀',name:'천안자생한방병원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'SH에너지화학점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션2팀',name:'캐슬렉스아카데미점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'건강한연합소아과점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'하이원팰리스호텔점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'광주FC클럽하우스점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'경찰병원환자식당점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'안산자생한방병원점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부4팀',name:'한국조폐공사제지본부점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'근로복지공단정선병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인2팀',name:'인천사할린동포복지회관점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부2팀',name:'청주자생한방병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'동아대병원환자식당점'},
+  {div:'기타',bu:'서부사업부',team:'FS서부1팀',name:'단국대학교병원환자식당점'},
+  {div:'학교',bu:'동부사업부',team:'FS동부5팀',name:'소노벨제주점'},
+  {div:'학교',bu:'서부사업부',team:'FS서부4팀',name:'SGC그린파워점'},
+  {div:'학교',bu:'컨세션사업부',team:'FS컨세션3팀',name:'스위트호텔제주점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부4팀',name:'경주새천년병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'카프성모병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'근로복지공단동해병원점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부4팀',name:'건강한윌병원점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'대구가톨릭대병원환자식당점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'YNCC3점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'경북권역재활병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'근로복지공단태백케어센터점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'더블유여성병원점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부1팀',name:'반도병원점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'국립나주병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'시온여성병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'포스코에너지미래관점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'소노쏠비치진도점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'부산자생한방병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'울진군의료원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'롯데백화점전주점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'스타필드시티부천점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부2팀',name:'코스모신소재점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부2팀',name:'스타필드명지점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'근로복지공단순천병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'롯데아울렛이시아폴리스점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'동천동강병원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'근로복지공단대전병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'경주굿모닝병원점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'소노캄여수점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'YNCC2점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'한화컴파운드점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인2팀',name:'사조대림인천공장점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인6팀',name:'롯데아울렛구리점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부2팀',name:'전문건설공제조합기술교육원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'세웅병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'롯데백화점영등포점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'우신향병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'서울재활병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'빌라쥬드아난티점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부5팀',name:'거제백병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인4팀',name:'인하대운동부식당점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'소노쏠비치양양점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'YNCC1점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부3팀',name:'광주기독병원점'},
+  {div:'군부대',bu:'경인사업부',team:'FS경인5팀',name:'수원중앙병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'파주에너지서비스점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인3팀',name:'한화호텔앤드리조트프라자호텔점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인6팀',name:'롯데타임빌라스수원점'},
+  {div:'군부대',bu:'경인사업부',team:'FS경인5팀',name:'근로복지공단태백병원점'},
+  {div:'군부대',bu:'경인사업부',team:'FS경인5팀',name:'비에스종합병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'롯데백화점인천점'},
+  {div:'군부대',bu:'경인사업부',team:'FS경인2팀',name:'근로복지공단경기케어센터점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부3팀',name:'바스프여수점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인6팀',name:'롯데몰광명점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'근로복지공단경기요양병원점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부4팀',name:'오씨아이에스이점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부1팀',name:'듀폰코리아천안3공장점'},
+  {div:'군부대',bu:'동부사업부',team:'FS동부2팀',name:'롯데백화점동래점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부1팀',name:'한국서부발전태안발전본부점'},
+  {div:'군부대',bu:'동부사업부',team:'FS동부4팀',name:'강남동강병원점'},
+  {div:'군부대',bu:'경인사업부',team:'FS경인5팀',name:'서울프라임병원점'},
+  {div:'군부대',bu:'동부사업부',team:'FS동부3팀',name:'포레시아코리아시트점'},
+  {div:'군부대',bu:'서부사업부',team:'FS서부1팀',name:'하나머티리얼즈천안점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'세강병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인7팀',name:'여주에너지서비스점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인4팀',name:'교원가평비전센터점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션2팀',name:'파주쉴낙원장례식장점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부1팀',name:'단국대학교병원직원식당점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'디허스코리아점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'한화솔루션TDI점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'무림페이퍼점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인6팀',name:'롯데아울렛이천점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'근로복지공단인천병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'롯데백화점대구점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션1팀',name:'스위트호텔남원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'그랜드하얏트인천점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'순천향구미병원점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'디엘케미칼점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'한국국제터미널점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부4팀',name:'동아대병원직원식당점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인1팀',name:'쿠팡안성4센터점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'롯데백화점상인점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'대동병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'한국전력국제원자력대학원대학교점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'곽병원점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'소노벨청송점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션2팀',name:'캐슬렉스서울GC점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부2팀',name:'빌리브세웅병원점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부3팀',name:'한화솔루션여수1점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부1팀',name:'진주한일병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'소노캄고양점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부1팀',name:'울산동강병원점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인5팀',name:'소노휴양평점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부4팀',name:'해운대백병원점'},
+  {div:'학교',bu:'경인사업부',team:'FS경인7팀',name:'하이원그랜드호텔점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부1팀',name:'해군부교대점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부3팀',name:'대구가톨릭대의료원점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부5팀',name:'소노캄거제점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인7팀',name:'포레시아코리아장안공장점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부1팀',name:'파이퍼베큠코리아점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인2팀',name:'게이트고메코리아점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션3팀',name:'부산대병원장례식장점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인2팀',name:'온세미코리아점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'소노펠리체점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'SGC에너지2점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'쿠팡인천KKR물류센터점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인1팀',name:'롯데백화점본점점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인3팀',name:'서울종합방재센터점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'세아특수강포항공장점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부1팀',name:'하나머티리얼즈아산점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부5팀',name:'쿠팡창원2앤3물류센터점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'쿠팡고양3센터점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부5팀',name:'태림페이퍼의령공장점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군기행교점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부3팀',name:'한국에너지공과대학교점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'소노쏠비치삼척점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인1팀',name:'롯데아울렛서울역점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인7팀',name:'스타필드시티위례점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'양산부산대병원직원식당점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군사관생도대점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부1팀',name:'공군후보생식당점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인7팀',name:'스타필드안성점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군사관생활관점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인4팀',name:'인하대제1생활관점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인3팀',name:'한국니토옵티칼점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'쿠팡고양1센터점'},
+  {div:'기타',bu:'동부사업부',team:'FS동부1팀',name:'해군생활관점'},
+  {div:'병원',bu:'서부사업부',team:'FS서부1팀',name:'단국대학교병원장례식장점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'소노펠리체이스트점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인7팀',name:'스타필드하남점'},
+  {div:'병원',bu:'경인사업부',team:'FS경인2팀',name:'근로복지공단안산병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인4팀',name:'인하대제2생활관점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'진주고려병원점'},
+  {div:'학교',bu:'컨세션사업부',team:'FS컨세션2팀',name:'키자니아서울점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인1팀',name:'쿠팡인천15센터점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'이동훈연세정형외과점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션3팀',name:'동남권원자력외래객식당점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'PNIT점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'소노쏠비치남해점'},
+  {div:'병원',bu:'동부사업부',team:'FS동부4팀',name:'대호특수강포항공장점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군정통교점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인5팀',name:'소노비발디파크홍천점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션3팀',name:'서울아산병원가람식당점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'공군신교대점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부2팀',name:'SSLM점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'고성성심병원점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션1팀',name:'세종충남대학교병원쉴낙원장례식장점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부3팀',name:'영천영남대학교병원점'},
+  {div:'B&I',bu:'경인사업부',team:'FS경인7팀',name:'소노델피노고성점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션3팀',name:'포항쉴낙원장례식장점'},
+  {div:'B&I',bu:'서부사업부',team:'FS서부4팀',name:'SGC에너지점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션3팀',name:'키자니아부산점'},
+  {div:'병원',bu:'컨세션사업부',team:'FS컨세션3팀',name:'동남권원자력장례식장점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부4팀',name:'포스코퓨처엠점'},
+  {div:'B&I',bu:'동부사업부',team:'FS동부1팀',name:'해군전투교점'},
+  {div:'B&I',bu:'컨세션사업부',team:'FS컨세션1팀',name:'논산쉴낙원장례식장점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부1팀',name:'해군신교대점'},
+  {div:'휴게소',bu:'동부사업부',team:'FS동부2팀',name:'근로복지공단창원병원점'},
+  {div:'휴게소',bu:'서부사업부',team:'FS서부4팀',name:'대전하나시티즌점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부1팀',name:'해군공수학부점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부3팀',name:'근로복지공단대구병원점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션1팀',name:'고창하행휴게소점'},
+  {div:'주유소',bu:'동부사업부',team:'FS동부1팀',name:'해군야교대점'},
+  {div:'주유소',bu:'컨세션사업부',team:'FS컨세션2팀',name:'고메이플레이스스플라스리솜점'},
+  {div:'휴게소',bu:'동부사업부',team:'FS동부2팀',name:'좋은문화병원산후조리원점'},
+  {div:'휴게소',bu:'컨세션사업부',team:'FS컨세션1팀',name:'고창상행휴게소점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션3팀',name:'아시아드CC점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션1팀',name:'갈마쉴낙원장례식장점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션1팀',name:'덕유산하행휴게소점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션1팀',name:'덕유산상행휴게소점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션2팀',name:'일산쉴낙원장례식장점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션3팀',name:'양산쉴낙원장례식장점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션1팀',name:'남대전쉴낙원장례식장점'},
+  {div:'컨세션',bu:'동부사업부',team:'FS동부1팀',name:'해군사관장교교육대점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션2팀',name:'고메이플레이스국립중앙박물관점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부5팀',name:'성동조선해양관점'},
+  {div:'장례식장',bu:'동부사업부',team:'FS동부4팀',name:'소노캄경주점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션2팀',name:'경기쉴낙원장례식장점'},
+  {div:'컨세션',bu:'경인사업부',team:'FS경인1팀',name:'한국마사회장학관점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션1팀',name:'당진쉴낙원장례식장점'},
+  {div:'컨세션',bu:'동부사업부',team:'FS동부5팀',name:'제주삼다수점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션2팀',name:'인천쉴낙원장례식장점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션2팀',name:'오산동탄쉴낙원장례식장점'},
+  {div:'컨세션',bu:'동부사업부',team:'FS동부5팀',name:'성동조선본관점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션3팀',name:'빌리브세웅병원쉴낙원장례식장점'},
+  {div:'장례식장',bu:'경인사업부',team:'FS경인7팀',name:'하이원밸리콘도점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션1팀',name:'충북대학교병원장례식장점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션2팀',name:'곤지암리조트점'},
+  {div:'장례식장',bu:'컨세션사업부',team:'FS컨세션1팀',name:'대천하행주유소점'},
+  {div:'컨세션',bu:'컨세션사업부',team:'FS컨세션1팀',name:'대천상행주유소점'},
+];
+
+const DATES=['05월23일','05월24일','05월25일'];
+const DATE_LABS=['5월 23일 (금)','5월 24일 (토)','5월 25일 (일)'];
+const MEALS=['조식','중식','석식','야식'];
+const WH_KEYS=['cook','helper','nutri','mgr','part'];
+const WH_LABS=['조리사','조리원','영양사','매니저','파출'];
+const KEY='sjsk4_';
+
+
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWj0lIOCVeVkbWPcGXs5jsYpb-7acjRxEGA3rE7JP9UbwSftsDOgWXlQu36qZkZQVpFw/exec';
+let allData = {}, currentOper = '운영';
+
+/* ── jsonbin helpers ── */
+function jbinReady(){ return JBIN_BIN_ID!=='YOUR_BIN_ID_HERE' && JBIN_API_KEY!=='YOUR_API_KEY_HERE'; }
+function jbinHeaders(){ return {'Content-Type':'application/json','X-Master-Key':JBIN_API_KEY,'X-Bin-Versioning':'false'}; }
+
+/* ── init: jsonbin에서 전체 데이터 로드 ── */
+async function init(){
+  // 로컬 캐시 먼저 로드 (오프라인 대비)
+  SITES.forEach(s=>{try{const r=localStorage.getItem(KEY+s.name);if(r)allData[s.name]=JSON.parse(r);}catch(e){}});
+  buildFilters();
+  renderAdmin();
+
+  // jsonbin 설정됐으면 최신 데이터 덮어쓰기
+  if(!jbinReady()) return;
+  try{
+    const res=await fetch(JBIN_BASE+'/'+JBIN_BIN_ID+'/latest',{headers:jbinHeaders()});
+    if(!res.ok) throw new Error('fetch '+res.status);
+    const json=await res.json();
+    const remote=json.record||{};
+    // 원격 데이터를 로컬에 병합 (더 최신 것 우선)
+    Object.keys(remote).forEach(site=>{
+      const rem=remote[site], loc=allData[site];
+      if(!loc || new Date(rem.updatedAt)>=new Date(loc.updatedAt)){
+        allData[site]=rem;
+        localStorage.setItem(KEY+site,JSON.stringify(rem));
+      }
+    });
+    renderAdmin();
+    console.log('[jsonbin] 데이터 로드 완료 —',Object.keys(remote).length,'개 사업장');
+  }catch(e){
+    console.warn('[jsonbin] 로드 실패 (로컬 캐시 사용):', e.message);
+  }
+}
+
+function buildFilters(){
+  const bus=[...new Set(SITES.map(s=>s.bu))].sort();
+  bus.forEach(b=>{
+    ['sel-bu','f-bu'].forEach(id=>{
+      const o=document.createElement('option');o.value=b;o.textContent=b;
+      document.getElementById(id).appendChild(o);
+    });
+  });
+}
+
+/* ── 연계 필터 ── */
+function onBu(){
+  const bu=document.getElementById('sel-bu').value;
+  const teams=[...new Set(SITES.filter(s=>!bu||s.bu===bu).map(s=>s.team))].sort();
+  const tSel=document.getElementById('sel-team');
+  tSel.innerHTML='<option value="">팀 선택</option>';
+  teams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tSel.appendChild(o);});
+  onTeam();
+}
+function onTeam(){
+  const bu=document.getElementById('sel-bu').value;
+  const team=document.getElementById('sel-team').value;
+  const sSel=document.getElementById('sel-site');
+  sSel.innerHTML='<option value="">사업장 선택</option>';
+  SITES.filter(s=>(!bu||s.bu===bu)&&(!team||s.team===team))
+    .forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name;sSel.appendChild(o);});
+  document.getElementById('form-body').style.display='none';
+}
+function onSite(){
+  const site=document.getElementById('sel-site').value;
+  if(!site){document.getElementById('form-body').style.display='none';return;}
+  document.getElementById('form-body').style.display='block';
+  buildMealPanels();
+  if(allData[site])loadIntoForm(allData[site]);
+  else{clearFields();setOper('운영');}
+}
+
+/* ── 운영여부 ── */
+function setOper(v){
+  currentOper=v;
+  document.getElementById('ob-run').className ='ob'+(v==='운영'?' run':'');
+  document.getElementById('ob-stop').className='ob'+(v==='미운영'?' stp':'');
+  document.getElementById('reason-box').className='reason-box'+(v==='미운영'?' show':'');
+}
+
+/* ── 날짜탭 ── */
+function goDate(idx,btn){
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  DATES.forEach((_,i)=>{const p=document.getElementById('mp-'+i);if(p)p.style.display=i===idx?'block':'none';});
+}
+
+/* ── 끼니 패널 빌드 ── */
+function buildMealPanels(){
+  const c=document.getElementById('meal-panels');c.innerHTML='';
+  DATES.forEach((dt,di)=>{
+    const wrap=document.createElement('div');
+    wrap.id='mp-'+di;wrap.style.display=di===0?'block':'none';
+
+    // 끼니 블록 (식수 + 효율화 체크 + 메뉴명)
+    const blocks=MEALS.map(m=>`
+      <div class="meal-block">
+        <div class="meal-hd">
+          <div class="meal-hd-name">${m}</div>
+          <div class="meal-hd-right">
+            <div class="meal-cnt-wrap">
+              <span style="font-size:11px;color:#aaa;margin-right:2px">예상 식수</span>
+              <input type="number" id="fs-${di}-${m}" min="0" step="1" placeholder="0" oninput="updTotal(${di})">
+              <span class="meal-cnt-unit">인</span>
+            </div>
+            <label class="eff-chk-wrap" id="ecw-${di}-${m}">
+              <input type="checkbox" id="ec-${di}-${m}" onchange="toggleEff(${di},'${m}')">
+              <span>효율화 제공</span>
+            </label>
+          </div>
+        </div>
+        <div class="meal-body" id="mb-${di}-${m}">
+          <div class="menu-inp-wrap">
+            <label>▸ 효율화 제공 메뉴명</label>
+            <input type="text" id="mn-${di}-${m}" placeholder="예) 돈육불고기, 제육볶음 등 메뉴명 입력">
+          </div>
+        </div>
+      </div>`).join('');
+
+    // 일 식수 합계 바
+    const totalBar=`
+      <div class="day-total-bar">
+        <span class="dtb-label">일 식수 합계</span>
+        <span class="dtb-val" id="dt-${di}">0</span>
+        <span class="dtb-unit">인</span>
+      </div>`;
+
+    // 일단위 조리 시수 박스
+    const whBox=`
+      <div class="day-wh-box">
+        <div class="day-wh-box-title">조리 시수 입력</div>
+        <div class="day-wh-box-hint">
+          직책별 전 인원의 <strong>총 시수 합계</strong>를 입력하세요.&nbsp;
+          예) 조리사 2명 × 4H 근무 → <strong>8H</strong> 입력
+        </div>
+        <div class="wh-row">
+          <div class="wh-item"><label>조리사 (H)</label><input type="number" id="wh-${di}-cook"   min="0" step="0.5" placeholder="0"></div>
+          <div class="wh-item"><label>조리원 (H)</label><input type="number" id="wh-${di}-helper" min="0" step="0.5" placeholder="0"></div>
+          <div class="wh-item"><label>영양사 (H)</label><input type="number" id="wh-${di}-nutri"  min="0" step="0.5" placeholder="0"></div>
+          <div class="wh-item"><label>매니저 (H)</label><input type="number" id="wh-${di}-mgr"    min="0" step="0.5" placeholder="0"></div>
+          <div class="wh-item"><label>파출 (H)</label>  <input type="number" id="wh-${di}-part"   min="0" step="0.5" placeholder="0"></div>
+        </div>
+      </div>`;
+
+    wrap.innerHTML=blocks+totalBar+whBox;
+    c.appendChild(wrap);
+    updTotal(di);
+  });
+}
+
+function toggleEff(di,m){
+  const cb=document.getElementById('ec-'+di+'-'+m);
+  const wrap=document.getElementById('ecw-'+di+'-'+m);
+  const body=document.getElementById('mb-'+di+'-'+m);
+  const on=cb&&cb.checked;
+  if(wrap)wrap.className='eff-chk-wrap'+(on?' on':'');
+  if(body)body.className='meal-body'+(on?' show':'');
+}
+function updTotal(di){
+  const sum=MEALS.reduce((a,m)=>a+(parseInt(document.getElementById('fs-'+di+'-'+m)?.value)||0),0);
+  const el=document.getElementById('dt-'+di);if(el)el.textContent=sum.toLocaleString();
+}
+
+/* ── 폼 로드/클리어 ── */
+function loadIntoForm(d){
+  setOper(d.active||'운영');
+  document.getElementById('inp-writer').value=d.writer||'';
+  document.getElementById('inp-reason').value=d.reason||'';
+  DATES.forEach((dt,di)=>{
+    MEALS.forEach(m=>{
+      const fs=document.getElementById('fs-'+di+'-'+m);if(fs)fs.value=d.foodcnt?.[dt]?.[m]||'';
+      const ec=document.getElementById('ec-'+di+'-'+m);
+      if(ec){ec.checked=d.effmeal?.[dt]?.[m]||false;toggleEff(di,m);}
+      const mn=document.getElementById('mn-'+di+'-'+m);if(mn)mn.value=d.menuname?.[dt]?.[m]||'';
+    });
+    // 일단위 시수
+    WH_KEYS.forEach(k=>{
+      const el=document.getElementById('wh-'+di+'-'+k);
+      if(el)el.value=d.wh_day?.[dt]?.[k]??'';
+    });
+    updTotal(di);
+  });
+}
+function clearFields(){
+  document.getElementById('inp-writer').value='';
+  document.getElementById('inp-reason').value='';
+  DATES.forEach((_,di)=>{
+    MEALS.forEach(m=>{
+      const fs=document.getElementById('fs-'+di+'-'+m);if(fs)fs.value='';
+      const ec=document.getElementById('ec-'+di+'-'+m);if(ec){ec.checked=false;toggleEff(di,m);}
+      const mn=document.getElementById('mn-'+di+'-'+m);if(mn)mn.value='';
+    });
+    WH_KEYS.forEach(k=>{const el=document.getElementById('wh-'+di+'-'+k);if(el)el.value='';});
+    updTotal(di);
+  });
+}
+function clearForm(){clearFields();setOper('운영');}
+
+/* ── 저장 ── */
+async function saveData(){
+  const site=document.getElementById('sel-site').value;
+  if(!site){toast('사업장을 선택해 주세요');return;}
+  if(currentOper==='미운영'&&!document.getElementById('inp-reason').value.trim()){toast('미운영 사유를 입력해 주세요');return;}
+
+  const foodcnt={},effmeal={},menuname={},wh_day={};
+  DATES.forEach((dt,di)=>{
+    foodcnt[dt]={};effmeal[dt]={};menuname[dt]={};wh_day[dt]={};
+    MEALS.forEach(m=>{
+      foodcnt[dt][m]=parseInt(document.getElementById('fs-'+di+'-'+m)?.value)||0;
+      effmeal[dt][m]=document.getElementById('ec-'+di+'-'+m)?.checked||false;
+      menuname[dt][m]=document.getElementById('mn-'+di+'-'+m)?.value.trim()||'';
+    });
+    WH_KEYS.forEach(k=>{
+      wh_day[dt][k]=parseFloat(document.getElementById('wh-'+di+'-'+k)?.value)||0;
+    });
+  });
+  const payload={site,active:currentOper,
+    reason:document.getElementById('inp-reason').value.trim(),
+    writer:document.getElementById('inp-writer').value.trim(),
+    foodcnt,effmeal,menuname,wh_day,
+    updatedAt:new Date().toLocaleString('ko-KR')};
+
+  // ── 1. 로컬 캐시 저장 (오프라인 대비) ──
+  localStorage.setItem(KEY+site,JSON.stringify(payload));
+  allData[site]=payload;
+  renderAdmin();
+
+// ── 2. 구글 스프레드시트 저장 ──
+  const btn = document.querySelector('.btn-save');
+  const origText = btn.textContent;
+  btn.textContent = '저장 중...'; btn.disabled = true;
+
+  // 구글 시트로 보낼 데이터 가공 (현재 사업장의 입력값 전체)
+  const payload = {
+    site: site,
+    writer: writer,
+    active: active,
+    reason: reason,
+    foodcnt: allData[site]?.foodcnt || {},
+    effmeal: allData[site]?.effmeal || {},
+    menuname: allData[site]?.menuname || {},
+    wh_day: allData[site]?.wh_day || {}
+  };
+
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain' // 구글 앱스 스크립트 CORS 이슈 방지를 위해 text/plain 사용
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const resData = await response.json();
+    if (resData.result === 'success') {
+      toast('성공적으로 구글 시트에 저장되었습니다 ✓');
+    } else {
+      throw new Error(resData.message);
+    }
+  } catch (err) {
+    console.error('[GoogleSheet] 저장 오류:', err);
+    // 서버 전송은 실패해도 현장 브라우저(localStorage)에는 보존되도록 유도
+    toast('로컬 저장 완료 (온라인 전송 실패, 네트워크 확인 요망)');
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+
+/* ── 탭 전환 ── */
+function goTab(t,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pane-'+t).classList.add('on');
+  if(t==='admin')renderAdmin();
+}
+
+/* ── 관리자 탭 ── */
+function renderAdmin(){
+  const total=SITES.length;
+  const done=SITES.filter(s=>allData[s.name]&&allData[s.name].active==='운영').length;
+  const stop=SITES.filter(s=>allData[s.name]&&allData[s.name].active==='미운영').length;
+  document.getElementById('m-total').textContent=total;
+  document.getElementById('m-done').textContent=done;
+  document.getElementById('m-stop').textContent=stop;
+  document.getElementById('m-pend').textContent=total-done-stop;
+  document.getElementById('prog').style.width=Math.round((done+stop)/total*100)+'%';
+
+  // 절감 집계
+  let totWh=0,totEff=0;
+  SITES.forEach(s=>{
+    const d=allData[s.name];if(!d||d.active!=='운영')return;
+    DATES.forEach(dt=>{
+      const wh=d.wh_day?.[dt]||{};
+      const daySum=WH_KEYS.reduce((a,k)=>a+(wh[k]||0),0);
+      totWh+=daySum;
+      // 해당 날짜에 효율화 제공 끼니가 하나라도 있으면 그 날 시수를 효율화 적용으로 집계
+      const hasEff=MEALS.some(m=>d.effmeal?.[dt]?.[m]);
+      if(hasEff)totEff+=daySum;
+    });
+  });
+  document.getElementById('agg-wh-total').textContent=totWh.toFixed(1)+'H';
+  document.getElementById('agg-eff-total').textContent=totEff.toFixed(1)+'H';
+  document.getElementById('agg-save-total').textContent=(totWh-totEff).toFixed(1)+'H';
+
+  // 집계 테이블
+  const tbody=document.getElementById('agg-body');
+  const aggSites=SITES.filter(s=>allData[s.name]&&allData[s.name].active==='운영');
+  if(!aggSites.length){
+    tbody.innerHTML='<tr><td colspan="8" style="padding:20px;color:#bbb;text-align:center">입력 완료 사업장이 없습니다</td></tr>';
+  } else {
+    tbody.innerHTML=aggSites.map(s=>{
+      const d=allData[s.name];
+      // 날짜별 효율화 메뉴 태그
+      const dateCells=DATES.map(dt=>{
+        const menus=MEALS.filter(m=>d.effmeal?.[dt]?.[m]&&d.menuname?.[dt]?.[m])
+          .map(m=>d.menuname[dt][m]);
+        const effMeals=MEALS.filter(m=>d.effmeal?.[dt]?.[m]);
+        if(!effMeals.length)return`<td>—</td>`;
+        const tags=menus.length?menus.map(mn=>`<span class="tag">${mn}</span>`).join('')
+          :effMeals.map(m=>`<span class="tag">${m}</span>`).join('');
+        return`<td class="eff-yes"><div class="tag-meals">${tags}</div></td>`;
+      }).join('');
+      // 시수 (날짜별 일단위)
+      let sWh=0,sEff=0;
+      DATES.forEach(dt=>{
+        const wh=d.wh_day?.[dt]||{};
+        const daySum=WH_KEYS.reduce((a,k)=>a+(wh[k]||0),0);
+        sWh+=daySum;
+        const hasEff=MEALS.some(m=>d.effmeal?.[dt]?.[m]);
+        if(hasEff)sEff+=daySum;
+      });
+      const save=sWh-sEff;
+      return`<tr>
+        <td class="site-nm">${s.name}</td>
+        <td>${s.bu}</td>
+        ${dateCells}
+        <td class="num">${sWh.toFixed(1)}</td>
+        <td class="num" style="color:#2e7d32">${sEff.toFixed(1)}</td>
+        <td class="num" style="color:#c0392b">${save.toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 사업장 목록
+  const srch=(document.getElementById('srch')?.value||'').toLowerCase();
+  const fSt=document.getElementById('f-status')?.value||'';
+  const fBu=document.getElementById('f-bu')?.value||'';
+  const filtered=SITES.filter(s=>{
+    if(srch&&!s.name.toLowerCase().includes(srch)&&!s.team.toLowerCase().includes(srch))return false;
+    if(fSt==='운영'&&(!allData[s.name]||allData[s.name].active!=='운영'))return false;
+    if(fSt==='미운영'&&(!allData[s.name]||allData[s.name].active!=='미운영'))return false;
+    if(fSt==='none'&&allData[s.name])return false;
+    if(fBu&&s.bu!==fBu)return false;
+    return true;
+  });
+  const list=document.getElementById('admin-list');
+  if(!filtered.length){list.innerHTML='<div class="site-list"><div class="empty">검색 결과가 없습니다</div></div>';return;}
+  list.innerHTML='<div class="site-list">'+filtered.map(s=>{
+    const d=allData[s.name];
+    let badge='<span class="badge b-no">미입력</span>';
+    if(d&&d.active==='운영')badge='<span class="badge b-ok">운영</span>';
+    if(d&&d.active==='미운영')badge='<span class="badge b-ng">미운영</span>';
+    const sub=d?`${d.writer||'—'} · ${d.updatedAt}`:`${s.bu} · ${s.team}`;
+    return`<div class="site-row">
+      <div><div class="site-nm">${s.name}</div><div class="site-sub">${sub}</div></div>
+      <div style="display:flex;align-items:center;gap:8px">${badge}
+        ${d?`<button class="btn-sm" onclick="showDetail('${s.name}')">상세</button>`:''}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+/* ── 상세 ── */
+function showDetail(name){
+  const d=allData[name];if(!d)return;
+  const area=document.getElementById('detail-area');
+  const dateSections=DATES.map((dt,i)=>{
+    const rows=MEALS.map(m=>{
+      const cnt=d.foodcnt?.[dt]?.[m]||0;
+      const eff=d.effmeal?.[dt]?.[m];
+      const mn=d.menuname?.[dt]?.[m]||'';
+      return`<div class="dc-meal-row">
+        <span class="dc-meal-key">${m}</span>
+        <span class="dc-meal-val">
+          ${cnt?cnt.toLocaleString()+'인':'미운영'}
+          ${eff?'&nbsp;<span style="color:#2e7d32;font-size:10px;font-weight:600">효율화✓</span>':''}
+          ${mn?`<div class="dc-meal-menu">▸ ${mn}</div>`:''}
+        </span>
+      </div>`;
+    }).join('');
+    const daySum=MEALS.reduce((a,m)=>a+(d.foodcnt?.[dt]?.[m]||0),0);
+    const wh=d.wh_day?.[dt]||{};
+    const dayWh=WH_KEYS.reduce((a,k)=>a+(wh[k]||0),0);
+    const whDetail=WH_KEYS.map((k,i)=>wh[k]?`${WH_LABS[i]} ${wh[k]}H`:'').filter(Boolean).join(' / ');
+    return`<div class="dc-date-title">${DATE_LABS[i]}</div>${rows}
+      <div class="dc-day-sum">
+        <span>일 합계</span>
+        <span>${daySum.toLocaleString()}인</span>
+      </div>
+      ${dayWh?`<div style="background:#f8f7f3;border-radius:6px;padding:8px 10px;margin-top:6px;font-size:11px;color:#555">
+        <span style="font-weight:700;color:#1a1a18;margin-right:6px">조리 시수</span>
+        총 ${dayWh.toFixed(1)}H &nbsp;
+        <span style="color:#aaa">(${whDetail})</span>
+      </div>`:''}`;
+  }).join('');
+
+  let totWh=0,totEff=0;
+  DATES.forEach(dt=>{
+    const wh=d.wh_day?.[dt]||{};
+    const s=WH_KEYS.reduce((a,k)=>a+(wh[k]||0),0);totWh+=s;
+    const hasEff=MEALS.some(m=>d.effmeal?.[dt]?.[m]);
+    if(hasEff)totEff+=s;
+  });
+
+  area.innerHTML=`<div class="detail-card">
+    <div class="dc-header">
+      <div>
+        <div class="dc-title">${name}</div>
+        <div class="dc-meta">
+          ${d.active==='미운영'?'<span style="color:#c0392b;font-weight:700">미운영</span>':'<span style="color:#357a16;font-weight:700">운영</span>'}
+          &nbsp;|&nbsp; ${d.writer||'—'} &nbsp;|&nbsp; ${d.updatedAt}
+        </div>
+      </div>
+      <button class="btn-x" onclick="document.getElementById('detail-area').innerHTML=''">×</button>
+    </div>
+    ${d.active==='미운영'&&d.reason?`<div style="background:#fdecea;border-radius:6px;padding:9px 13px;font-size:12px;color:#c0392b;margin-bottom:12px"><strong>미운영 사유:</strong> ${d.reason}</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 260px;gap:20px">
+      <div>${dateSections}</div>
+      <div>
+        <div class="dc-date-title" style="margin-top:0">시수 절감 요약</div>
+        <div style="background:#f8f7f3;border-radius:8px;padding:12px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #eee">
+            <span style="color:#888">전체 시수 합계</span><span style="font-weight:600">${totWh.toFixed(1)}H</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #eee">
+            <span style="color:#888">효율화 적용 시수</span><span style="font-weight:600;color:#2e7d32">${totEff.toFixed(1)}H</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0 0">
+            <span style="color:#888;font-weight:600">절감 시수</span>
+            <span style="font-weight:700;color:#c0392b;font-size:15px">${(totWh-totEff).toFixed(1)}H</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  area.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ── CSV ── */
+function exportCSV(){
+  const header=['직군','사업부','운영팀','사업장','운영여부','미운영사유','작성자',
+    ...DATES.flatMap(dt=>MEALS.map(m=>dt+'_'+m+'_식수')),
+    ...DATES.flatMap(dt=>MEALS.map(m=>dt+'_'+m+'_효율화여부')),
+    ...DATES.flatMap(dt=>MEALS.map(m=>dt+'_'+m+'_효율화메뉴명')),
+    ...DATES.map(dt=>dt+'_일합계식수'),
+    ...DATES.flatMap(dt=>WH_LABS.map(l=>dt+'_'+l+'_시수H')),
+    ...DATES.map(dt=>dt+'_일총시수H'),
+    '3일간총시수H','3일간효율화적용시수H','3일간절감시수H'];
+  const rows=[header];
+  SITES.forEach(s=>{
+    const d=allData[s.name];
+    const fc=d?.foodcnt||{},ef=d?.effmeal||{},mn=d?.menuname||{},wd=d?.wh_day||{};
+    let tWh=0,tEff=0;
+    const daySums=DATES.map(dt=>MEALS.reduce((a,m)=>a+(fc[dt]?.[m]||0),0));
+    const whByCols=DATES.flatMap(dt=>WH_KEYS.map(k=>{
+      const v=wd[dt]?.[k]||0;return v||'';
+    }));
+    const dayWhSums=DATES.map(dt=>{
+      const s=WH_KEYS.reduce((a,k)=>a+(wd[dt]?.[k]||0),0);
+      tWh+=s;
+      const hasEff=MEALS.some(m=>ef[dt]?.[m]);
+      if(hasEff)tEff+=s;
+      return s||'';
+    });
+    rows.push([s.div,s.bu,s.team,s.name,d?.active||'',d?.reason||'',d?.writer||'',
+      ...DATES.flatMap(dt=>MEALS.map(m=>fc[dt]?.[m]||'')),
+      ...DATES.flatMap(dt=>MEALS.map(m=>ef[dt]?.[m]?'O':'')),
+      ...DATES.flatMap(dt=>MEALS.map(m=>mn[dt]?.[m]||'')),
+      ...daySums.map(v=>v||''),
+      ...whByCols,
+      ...dayWhSums,
+      tWh||'',tEff||'',(tWh-tEff)||'']);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='스마트키친_취합_'+new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  toast('CSV 다운로드 완료 ✓');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+init();
+</script>
+</body>
+</html>
