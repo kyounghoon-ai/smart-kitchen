@@ -778,29 +778,18 @@ async function saveData(){
   allData[site]=payload;
   renderAdmin();
 
-// ── 2. 구글 스프레드시트 저장 ──
+  // ── 2. 구글 스프레드시트 저장 ──
   const btn = document.querySelector('.btn-save');
   const origText = btn.textContent;
   btn.textContent = '저장 중...'; btn.disabled = true;
-
-  // 구글 시트로 보낼 데이터 가공 (현재 사업장의 입력값 전체)
-  const payload = {
-    site: site,
-    writer: writer,
-    active: active,
-    reason: reason,
-    foodcnt: allData[site]?.foodcnt || {},
-    effmeal: allData[site]?.effmeal || {},
-    menuname: allData[site]?.menuname || {},
-    wh_day: allData[site]?.wh_day || {}
-  };
 
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain' // 구글 앱스 스크립트 CORS 이슈 방지를 위해 text/plain 사용
+        'Content-Type': 'text/plain' 
       },
+      // 위에서 이미 정리된 원본 데이터(payload)를 그대로 구글 시트로 쏩니다.
       body: JSON.stringify(payload)
     });
 
@@ -812,12 +801,12 @@ async function saveData(){
     }
   } catch (err) {
     console.error('[GoogleSheet] 저장 오류:', err);
-    // 서버 전송은 실패해도 현장 브라우저(localStorage)에는 보존되도록 유도
     toast('로컬 저장 완료 (온라인 전송 실패, 네트워크 확인 요망)');
   } finally {
     btn.textContent = origText;
     btn.disabled = false;
   }
+}
 
 /* ── 탭 전환 ── */
 function goTab(t,btn){
